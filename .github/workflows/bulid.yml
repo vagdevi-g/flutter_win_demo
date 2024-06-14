@@ -16,8 +16,7 @@ jobs:
       with:
         channel: stable
         flutter-version: latest
-        architecture: x64
-        cache: false
+       
 
     - name: Install dependencies
       run: flutter pub get
