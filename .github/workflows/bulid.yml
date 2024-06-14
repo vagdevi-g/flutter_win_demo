@@ -1,0 +1,40 @@
+name: Build and Publish MSIX
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version: 'latest'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build application
+      run: flutter build windows
+      working-directory: ${{ github.workspace }}
+
+    - name: Create MSIX package
+      run: flutter pub run msix:create
+      working-directory: ${{ github.workspace }}
+
+    - name: Copy app to staging directory
+      run: |
+        mkdir -p ${{ github.workspace }}/staging
+        find ${{ runner.workspace }} -name "*.msix" -exec cp {} ${{ github.workspace }}/staging \;
+
+    - name: Upload MSIX artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Windows
+        path: ${{ github.workspace }}/staging/*.msix
